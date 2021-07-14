@@ -2,6 +2,7 @@ package control;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -20,10 +21,7 @@ import model.card.Card;
 import model.card.Monster;
 import model.card.Spell;
 import model.card.Trap;
-import model.template.CardTemplate;
-import model.template.MonsterTemplate;
-import model.template.SpellTemplate;
-import model.template.TrapTemplate;
+import model.template.*;
 import model.template.property.CardType;
 import model.template.property.MonsterAttribute;
 import model.template.property.MonsterType;
@@ -37,6 +35,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Random;
 
 public class DataManager {
 
@@ -177,6 +176,7 @@ public class DataManager {
 
     public void addLoggedInUser(String token, String username) {
         loggedInUsers.put(token, username);
+        System.out.println(loggedInUsers);
     }
 
     public void removeLoggedInUser(String token) {
@@ -214,6 +214,14 @@ public class DataManager {
                 .registerSubtype(Monster.class, MonsterTemplate.class.getName())
                 .registerSubtype(Spell.class, SpellTemplate.class.getName())
                 .registerSubtype(Trap.class, TrapTemplate.class.getName());
+    }
+
+    private RuntimeTypeAdapterFactory<CardTemplate> getCardTemplateAdapter() {
+        return RuntimeTypeAdapterFactory
+                .of(CardTemplate.class, "card_template_type")
+                .registerSubtype(MonsterTemplate.class, MonsterTemplate.class.getName())
+                .registerSubtype(SpellTemplate.class, SpellTemplate.class.getName())
+                .registerSubtype(TrapTemplate.class, TrapTemplate.class.getName());
     }
 
 
@@ -499,5 +507,23 @@ public class DataManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public JsonObject getShopItems(User user) {
+        RuntimeTypeAdapterFactory<CardTemplate> cardTemplateAdapter = dataManager.getCardTemplateAdapter();
+        Gson gson = new GsonBuilder().registerTypeAdapterFactory(cardTemplateAdapter).create();
+        Type templateType = CardTemplate.class;
+
+        JsonArray templatesArray = new JsonArray();
+        JsonArray purchasedArray = new JsonArray();
+        for (CardTemplate template : templates) {
+            templatesArray.add(gson.toJsonTree(template, templateType));
+            purchasedArray.add(user.getPurchasedCardsByName(template.getName()).size());
+        }
+        JsonObject shopItems = new JsonObject();
+        shopItems.add("templates", templatesArray);
+        shopItems.add("purchased_counts", purchasedArray);
+        return shopItems;
     }
 }

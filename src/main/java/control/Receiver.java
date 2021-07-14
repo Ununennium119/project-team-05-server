@@ -2,10 +2,7 @@ package control;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import control.controller.DataController;
-import control.controller.LoginMenuController;
-import control.controller.MainMenuController;
-import control.controller.ProfileMenuController;
+import control.controller.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -66,6 +63,11 @@ public class Receiver extends Thread {
                 case "profile":
                     ProfileMenuController.parseCommand(commandName, infoObject, this);
                     break;
+                case "shop":
+                    ShopMenuController.parseCommand(commandName, infoObject, this);
+                    break;
+                default:
+                    throw new Exception("Invalid command type");
             }
             return false;
         } catch (Exception e) {
