@@ -11,7 +11,6 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 import com.opencsv.ICSVWriter;
-import control.message.LoginMenuMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Deck;
@@ -21,7 +20,10 @@ import model.card.Card;
 import model.card.Monster;
 import model.card.Spell;
 import model.card.Trap;
-import model.template.*;
+import model.template.CardTemplate;
+import model.template.MonsterTemplate;
+import model.template.SpellTemplate;
+import model.template.TrapTemplate;
 import model.template.property.CardType;
 import model.template.property.MonsterAttribute;
 import model.template.property.MonsterType;
@@ -35,7 +37,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Random;
 
 public class DataManager {
 
@@ -176,12 +177,10 @@ public class DataManager {
 
     public void addLoggedInUser(String token, String username) {
         loggedInUsers.put(token, username);
-        System.out.println(loggedInUsers);
     }
 
     public void removeLoggedInUser(String token) {
         loggedInUsers.remove(token);
-        System.out.println(loggedInUsers);
     }
 
     public User getUserByToken(String token) {
@@ -222,6 +221,15 @@ public class DataManager {
                 .registerSubtype(MonsterTemplate.class, MonsterTemplate.class.getName())
                 .registerSubtype(SpellTemplate.class, SpellTemplate.class.getName())
                 .registerSubtype(TrapTemplate.class, TrapTemplate.class.getName());
+    }
+
+
+    private JsonArray parseToJsonArray(ArrayList<Card> cards) {
+        RuntimeTypeAdapterFactory<Card> cardAdapter = getCardAdapter();
+        Gson cardGson = new GsonBuilder().serializeNulls().registerTypeAdapterFactory(cardAdapter).create();
+        Type type = new TypeToken<ArrayList<Card>>() {
+        }.getType();
+        return cardGson.toJsonTree(cards, type).getAsJsonArray();
     }
 
 
@@ -525,5 +533,26 @@ public class DataManager {
         shopItems.add("templates", templatesArray);
         shopItems.add("purchased_counts", purchasedArray);
         return shopItems;
+    }
+
+    public JsonObject getDeckInfo(Deck deck) {
+        JsonObject deckObject = new Gson().toJsonTree(deck).getAsJsonObject();
+        JsonArray mainDeckCards = parseToJsonArray(deck.getMainDeck());
+        JsonArray sideDeckCards = parseToJsonArray(deck.getSideDeck());
+        JsonObject deckInfo = new JsonObject();
+        deckInfo.add("deck", deckObject);
+        deckInfo.add("main_deck", mainDeckCards);
+        deckInfo.add("side_deck", sideDeckCards);
+        return deckInfo;
+    }
+
+    public JsonArray getUserDecks(User user) {
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        return gson.toJsonTree(user.getDecks()).getAsJsonArray();
+    }
+
+    public JsonArray getAddableCards(Deck deck, User user) {
+        ArrayList<Card> addableCards = deck.getAddableCards(user.getPurchasedCards());
+        return parseToJsonArray(addableCards);
     }
 }

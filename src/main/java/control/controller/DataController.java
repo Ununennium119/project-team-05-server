@@ -2,10 +2,12 @@ package control.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import control.DataManager;
 import control.Receiver;
 import control.message.LoginMenuMessage;
+import model.Deck;
 import model.User;
 
 public class DataController {
@@ -20,9 +22,18 @@ public class DataController {
             case "get_shop_items":
                 responseObject = getShopItems(infoObject);
                 break;
+            case "get_decks":
+                responseObject = getDecks(infoObject);
+                break;
+            case "get_deck_info":
+                responseObject = getDeckInfo(infoObject);
+                break;
+            case "get_addable_cards":
+                responseObject = getAddableCards(infoObject);
+                break;
             default:
                 responseObject = new JsonObject();
-                responseObject.addProperty("message", String.valueOf(LoginMenuMessage.ERROR));
+                responseObject.addProperty("message", "ERROR");
         }
         receiver.sendResponse(responseObject.toString());
     }
@@ -50,6 +61,63 @@ public class DataController {
         }
         JsonObject items = dataManager.getShopItems(user);
         responseObject.add("data", items);
+        return responseObject;
+    }
+
+
+    private static JsonObject getDecks(JsonObject infoObject) {
+        JsonObject responseObject = new JsonObject();
+        String token = infoObject.get("token").getAsString();
+        DataManager dataManager = DataManager.getInstance();
+        User user = dataManager.getUserByToken(token);
+        if (user == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        JsonArray decks = dataManager.getUserDecks(user);
+        responseObject.add("data", decks);
+        return responseObject;
+    }
+
+
+    private static JsonObject getDeckInfo(JsonObject infoObject) {
+        JsonObject responseObject = new JsonObject();
+        String token = infoObject.get("token").getAsString();
+        DataManager dataManager = DataManager.getInstance();
+        User user = dataManager.getUserByToken(token);
+        if (user == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        String deckName = infoObject.get("deck_name").getAsString();
+        Deck deck = user.getDeckByName(deckName);
+        if (deck == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        JsonObject deckInfo = dataManager.getDeckInfo(deck);
+        responseObject.add("data", deckInfo);
+        return responseObject;
+    }
+
+
+    private static JsonObject getAddableCards(JsonObject infoObject) {
+        JsonObject responseObject = new JsonObject();
+        String token = infoObject.get("token").getAsString();
+        DataManager dataManager = DataManager.getInstance();
+        User user = dataManager.getUserByToken(token);
+        if (user == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        String deckName = infoObject.get("deck_name").getAsString();
+        Deck deck = user.getDeckByName(deckName);
+        if (deck == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        JsonArray addableCards = dataManager.getAddableCards(deck, user);
+        responseObject.add("data", addableCards);
         return responseObject;
     }
 }

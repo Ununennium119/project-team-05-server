@@ -66,6 +66,9 @@ public class Receiver extends Thread {
                 case "shop":
                     ShopMenuController.parseCommand(commandName, infoObject, this);
                     break;
+                case "deck":
+                    DeckMenuController.parseCommand(commandName, infoObject, this);
+                    break;
                 default:
                     throw new Exception("Invalid command type");
             }
