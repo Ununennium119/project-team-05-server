@@ -8,7 +8,10 @@ import control.DataManager;
 import control.Receiver;
 import control.message.LoginMenuMessage;
 import model.Deck;
+import model.ScoreboardItem;
 import model.User;
+
+import java.util.ArrayList;
 
 public class DataController {
 
@@ -30,6 +33,9 @@ public class DataController {
                 break;
             case "get_addable_cards":
                 responseObject = getAddableCards(infoObject);
+                break;
+            case "get_scoreboard_items":
+                responseObject = getScoreboardItems(infoObject);
                 break;
             default:
                 responseObject = new JsonObject();
@@ -118,6 +124,22 @@ public class DataController {
         }
         JsonArray addableCards = dataManager.getAddableCards(deck, user);
         responseObject.add("data", addableCards);
+        return responseObject;
+    }
+
+
+    private static JsonObject getScoreboardItems(JsonObject infoObject) {
+        JsonObject responseObject = new JsonObject();
+        String token = infoObject.get("token").getAsString();
+        DataManager dataManager = DataManager.getInstance();
+        User user = dataManager.getUserByToken(token);
+        if (user == null) {
+            responseObject.add("data", null);
+            return responseObject;
+        }
+        ArrayList<ScoreboardItem> scoreboardItems = dataManager.getScoreboardItems(user);
+        Gson gson = new Gson();
+        responseObject.add("data", gson.toJsonTree(scoreboardItems).getAsJsonArray());
         return responseObject;
     }
 }

@@ -189,19 +189,25 @@ public class DataManager {
         return getUserByUsername(username);
     }
 
+    public boolean isOnline(User user) {
+        return loggedInUsers.containsValue(user.getUsername());
+    }
 
-    public ObservableList<ScoreboardItem> getScoreboardItems() {
+
+    public ArrayList<ScoreboardItem> getScoreboardItems(User user) {
         sortUsers();
-        ObservableList<ScoreboardItem> scoreboardItems = FXCollections.observableArrayList();
+        ArrayList<ScoreboardItem> scoreboardItems = new ArrayList<>();
         for (int i = 0, rank = 1, size = this.users.size(); i < size; i++) {
-            User user = this.users.get(i);
+            User currentUser = this.users.get(i);
             String rankString = String.valueOf(rank);
-            String scoreString = String.valueOf(user.getScore());
-            scoreboardItems.add(new ScoreboardItem(rankString, user.getNickname(), scoreString));
-            if (i < size - 1 && user.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
+            String scoreString = String.valueOf(currentUser.getScore());
+            boolean isCurrentUser = user.equals(currentUser);
+            boolean isOnline = this.isOnline(currentUser);
+            scoreboardItems.add(new ScoreboardItem(rankString, currentUser.getNickname(), scoreString, isCurrentUser, isOnline));
+            if (i < size - 1 && currentUser.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
         }
         for (int i = scoreboardItems.size(); i < 20; i++) {
-            scoreboardItems.add(new ScoreboardItem("-", "-", "-"));
+            scoreboardItems.add(new ScoreboardItem("-", "-", "-", false, false));
         }
         return scoreboardItems;
     }
