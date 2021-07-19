@@ -11,6 +11,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 import com.opencsv.ICSVWriter;
+import control.controller.ScoreboardMenuController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Deck;
@@ -90,6 +91,7 @@ public class DataManager {
 
     public synchronized void addUser(User user) {
         this.users.add(user);
+        ScoreboardMenuController.refreshScoreboard();
     }
 
     public User getUserByUsername(String username) {
@@ -177,10 +179,12 @@ public class DataManager {
 
     public void addLoggedInUser(String token, String username) {
         loggedInUsers.put(token, username);
+        ScoreboardMenuController.refreshScoreboard();
     }
 
     public void removeLoggedInUser(String token) {
         loggedInUsers.remove(token);
+        ScoreboardMenuController.refreshScoreboard();
     }
 
     public User getUserByToken(String token) {

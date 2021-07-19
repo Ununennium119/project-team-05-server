@@ -29,63 +29,69 @@ public class LoginMenuController {
 
 
     public static JsonObject createUser(JsonObject infoObject) {
+        JsonObject responseInfoObject = new JsonObject();
         JsonObject responseObject = new JsonObject();
+        responseObject.addProperty("command_type", "login");
+        responseObject.addProperty("command_name", "create_user_response");
+        responseObject.add("info", responseInfoObject);
         String username = infoObject.get("username").getAsString();
         if (username.contains(" ")) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_CONTAIN_SPACE));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_CONTAIN_SPACE));
             return responseObject;
         }
         String nickname = infoObject.get("nickname").getAsString();
         if (nickname.contains(" ")) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.NICKNAME_CONTAIN_SPACE));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.NICKNAME_CONTAIN_SPACE));
             return responseObject;
         }
         String password = infoObject.get("password").getAsString();
         if (password.contains(" ")) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.PASSWORD_CONTAIN_SPACE));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.PASSWORD_CONTAIN_SPACE));
             return responseObject;
         }
         DataManager dataManager = DataManager.getInstance();
         if (dataManager.getUserByUsername(username) != null) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_EXISTS));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_EXISTS));
             return responseObject;
         }
         if (dataManager.getUserByNickname(nickname) != null) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.NICKNAME_EXISTS));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.NICKNAME_EXISTS));
             return responseObject;
         }
         User user = new User(username, password, nickname);
         dataManager.addUser(user);
-        responseObject.addProperty("message", String.valueOf(LoginMenuMessage.USER_CREATED));
+        responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.USER_CREATED));
         return responseObject;
     }
 
 
     public static JsonObject loginUser(JsonObject infoObject) {
+        JsonObject responseInfoObject = new JsonObject();
         JsonObject responseObject = new JsonObject();
+        responseObject.addProperty("command_type", "login");
+        responseObject.addProperty("command_name", "login_user_response");
+        responseObject.add("info", responseInfoObject);
         String username = infoObject.get("username").getAsString();
         if (username.contains(" ")) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_CONTAIN_SPACE));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.USERNAME_CONTAIN_SPACE));
             return responseObject;
         }
         String password = infoObject.get("password").getAsString();
         if (password.contains(" ")) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.PASSWORD_CONTAIN_SPACE));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.PASSWORD_CONTAIN_SPACE));
             return responseObject;
         }
         User user = DataManager.getInstance().getUserByUsername(username);
         if (user == null || !password.equals(user.getPassword())) {
-            responseObject.addProperty("message", String.valueOf(LoginMenuMessage.NO_MATCH));
+            responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.NO_MATCH));
             return responseObject;
         }
         DataManager dataManager = DataManager.getInstance();
         String token = UUID.randomUUID().toString();
         dataManager.addLoggedInUser(token, username);
 
-        JsonObject responseInfoObject = new JsonObject();
+        responseInfoObject.addProperty("message", String.valueOf(LoginMenuMessage.LOGGED_IN));
         responseInfoObject.addProperty("token", token);
-        responseObject.addProperty("message", String.valueOf(LoginMenuMessage.LOGGED_IN));
-        responseObject.add("info", responseInfoObject);
         return responseObject;
     }
 }

@@ -41,6 +41,7 @@ public class Receiver extends Thread {
         } catch (Exception e) {
             System.out.println("An error Occurred");
         }
+        Listener.getListener().removeReceiver(this);
     }
 
 
