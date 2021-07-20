@@ -15,6 +15,7 @@ import control.controller.ScoreboardMenuController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Deck;
+import model.Message;
 import model.ScoreboardItem;
 import model.User;
 import model.card.Card;
@@ -45,6 +46,7 @@ public class DataManager {
     private static final String USERS_JSON_PATH = "data" + File.separator + "users.json";
     private static final String CARDS_JSON_PATH = "data" + File.separator + "cards.json";
     private static final String DECKS_JSON_PATH = "data" + File.separator + "decks.json";
+    private static final String MESSAGES_JSON_PATH = "data" + File.separator + "messages.json";
     //    private static final String EFFECTS_JSON_PATH = "data" + File.separator + "effects.json";
     private static final String MONSTER_CSV_PATH = "data" + File.separator + "Monster.csv";
     private static final String SPELL_TRAP_CSV_PATH = "data" + File.separator + "SpellTrap.csv";
@@ -57,6 +59,7 @@ public class DataManager {
     private ArrayList<User> users;
     private ArrayList<Card> cards;
     private ArrayList<Deck> decks;
+    private ArrayList<Message> messages;
 
     {
         users = new ArrayList<>();
@@ -174,6 +177,11 @@ public class DataManager {
             }
         }
         return null;
+    }
+
+
+    public void addMessage(Message message) {
+        this.messages.add(message);
     }
 
 
@@ -351,6 +359,19 @@ public class DataManager {
         }
     }
 
+    private void loadMessages() {
+        try {
+            Gson gson = new Gson();
+            JsonReader messagesReader = new JsonReader(new FileReader(MESSAGES_JSON_PATH));
+            Type messageType = new TypeToken<ArrayList<Message>>() {
+            }.getType();
+            this.messages = gson.fromJson(messagesReader, messageType);
+            messagesReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /*private void loadEffects() {
         try {
             JsonParser parser = new JsonParser();
@@ -379,6 +400,7 @@ public class DataManager {
         loadSpellTrapTemplatesFromCSV();
         loadCards();
         loadDecks();
+        loadMessages();
 //        loadEffects();
     }
 
@@ -422,10 +444,23 @@ public class DataManager {
         }
     }
 
+    private void saveMessages() {
+        try {
+            Gson gson = new GsonBuilder().serializeNulls().create();
+            FileWriter messagesWriter = new FileWriter(MESSAGES_JSON_PATH);
+            gson.toJson(this.messages, messagesWriter);
+            messagesWriter.flush();
+            messagesWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void saveData() {
         saveUsers();
         saveCards();
         saveDecks();
+        saveMessages();
     }
 
 
@@ -564,5 +599,10 @@ public class DataManager {
     public JsonArray getAddableCards(Deck deck, User user) {
         ArrayList<Card> addableCards = deck.getAddableCards(user.getPurchasedCards());
         return parseToJsonArray(addableCards);
+    }
+
+    public JsonArray getMessagesArray() {
+        Gson gson = new Gson();
+        return gson.toJsonTree(messages).getAsJsonArray();
     }
 }

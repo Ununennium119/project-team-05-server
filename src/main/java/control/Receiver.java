@@ -70,6 +70,9 @@ public class Receiver extends Thread {
                 case "deck":
                     DeckMenuController.parseCommand(commandName, infoObject, this);
                     break;
+                case "chat":
+                    ChatRoomController.parseCommand(commandName, infoObject, this);
+                    break;
                 default:
                     throw new Exception("Invalid command type");
             }

@@ -35,6 +35,9 @@ public class DataController {
             case "get_scoreboard_items":
                 responseObject = getScoreboardItems(infoObject);
                 break;
+            case "get_messages":
+                responseObject = getMessages(infoObject);
+                break;
             default:
                 responseObject = new JsonObject();
                 responseObject.addProperty("message", "ERROR");
@@ -165,6 +168,25 @@ public class DataController {
         ArrayList<ScoreboardItem> scoreboardItems = dataManager.getScoreboardItems(user);
         Gson gson = new Gson();
         responseInfoObject.add("scoreboard_items", gson.toJsonTree(scoreboardItems).getAsJsonArray());
+        return responseObject;
+    }
+
+
+    private static JsonObject getMessages(JsonObject infoObject) {
+        JsonObject responseInfoObject = new JsonObject();
+        JsonObject responseObject = new JsonObject();
+        responseObject.addProperty("command_type", "data");
+        responseObject.addProperty("command_name", "get_messages_response");
+        responseObject.add("info", responseInfoObject);
+        String token = infoObject.get("token").getAsString();
+        DataManager dataManager = DataManager.getInstance();
+        User user = dataManager.getUserByToken(token);
+        if (user == null) {
+            responseInfoObject.add("messages", null);
+            return responseObject;
+        }
+        JsonArray messagesArray = dataManager.getMessagesArray();
+        responseInfoObject.add("messages", messagesArray);
         return responseObject;
     }
 }
