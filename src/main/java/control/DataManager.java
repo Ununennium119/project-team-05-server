@@ -65,6 +65,16 @@ public class DataManager {
 
 
     private DataManager() {
+        Thread saveThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException ignored) {
+                }
+                saveData();
+            }
+        });
+        saveThread.start();
     }
 
 
@@ -229,7 +239,7 @@ public class DataManager {
             this.users.addAll(gson.fromJson(userReader, userType));
             userReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to load users");
         }
     }
 
@@ -256,7 +266,7 @@ public class DataManager {
             }
             csvReader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Failed to load monster templates");
         }
     }
 
@@ -286,7 +296,7 @@ public class DataManager {
             }
             csvReader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Failed to load spell and trap templates");
         }
     }
 
@@ -301,7 +311,7 @@ public class DataManager {
             this.cards.addAll(cardGson.fromJson(cardReader, cardType));
             cardReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to load cards");
         }
     }
 
@@ -315,7 +325,7 @@ public class DataManager {
             this.decks.addAll(gson.fromJson(deckReader, deckType));
             deckReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to load decks");
         }
     }
 
@@ -329,7 +339,7 @@ public class DataManager {
             this.messages.addAll(gson.fromJson(messagesReader, messageType));
             messagesReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to load messages");
         }
     }
 
@@ -352,7 +362,7 @@ public class DataManager {
             userWriter.flush();
             userWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to save users");
         }
     }
 
@@ -367,7 +377,7 @@ public class DataManager {
             cardsWriter.flush();
             cardsWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to save cards");
         }
     }
 
@@ -379,7 +389,7 @@ public class DataManager {
             decksWriter.flush();
             decksWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to save decks");
         }
     }
 
@@ -391,7 +401,7 @@ public class DataManager {
             messagesWriter.flush();
             messagesWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to save messages");
         }
     }
 
@@ -446,14 +456,14 @@ public class DataManager {
         ArrayList<ScoreboardItem> scoreboardItems = new ArrayList<>();
         synchronized (this.users) {
             for (int i = 0, rank = 1, size = this.users.size(); i < size; i++) {
-            User currentUser = this.users.get(i);
-            String rankString = String.valueOf(rank);
-            String scoreString = String.valueOf(currentUser.getScore());
-            boolean isCurrentUser = user.equals(currentUser);
-            boolean isOnline = this.isOnline(currentUser);
-            scoreboardItems.add(new ScoreboardItem(rankString, currentUser.getNickname(), scoreString, isCurrentUser, isOnline));
-            if (i < size - 1 && currentUser.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
-        }
+                User currentUser = this.users.get(i);
+                String rankString = String.valueOf(rank);
+                String scoreString = String.valueOf(currentUser.getScore());
+                boolean isCurrentUser = user.equals(currentUser);
+                boolean isOnline = this.isOnline(currentUser);
+                scoreboardItems.add(new ScoreboardItem(rankString, currentUser.getNickname(), scoreString, isCurrentUser, isOnline));
+                if (i < size - 1 && currentUser.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
+            }
         }
         for (int i = scoreboardItems.size(); i < 20; i++) {
             scoreboardItems.add(new ScoreboardItem("-", "-", "-", false, false));
