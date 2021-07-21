@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+@SuppressWarnings("SameReturnValue")
 public class Receiver extends Thread {
 
     private final Socket socket;

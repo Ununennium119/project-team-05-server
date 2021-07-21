@@ -2,6 +2,7 @@ package model;
 
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class Message {
 
     private final String id;

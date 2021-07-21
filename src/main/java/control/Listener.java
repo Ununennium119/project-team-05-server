@@ -47,6 +47,7 @@ public class Listener {
 
 
     public void run() {
+        //noinspection InfiniteLoopStatement
         while (true) {
             try {
                 Socket socket = serverSocket.accept();

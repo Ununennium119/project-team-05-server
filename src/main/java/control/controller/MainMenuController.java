@@ -20,6 +20,7 @@ public class MainMenuController {
     }
 
 
+    @SuppressWarnings("SameReturnValue")
     private static JsonObject logoutUser(JsonObject infoObject) {
         JsonObject responseObject = new JsonObject();
         String token = infoObject.get("token").getAsString();

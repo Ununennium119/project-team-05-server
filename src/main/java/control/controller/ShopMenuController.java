@@ -76,6 +76,7 @@ public class ShopMenuController {
     }
 
 
+    @SuppressWarnings("SameReturnValue")
     public static JsonObject increaseMoney(JsonObject infoObject) {
         String token = infoObject.get("token").getAsString();
         DataManager dataManager = DataManager.getInstance();

@@ -4,6 +4,7 @@ import model.template.MonsterTemplate;
 import model.template.property.MonsterAttribute;
 import model.template.property.MonsterType;
 
+@SuppressWarnings("unused")
 public class Monster extends Card {
 
     private MonsterType monsterType;
@@ -14,7 +15,7 @@ public class Monster extends Card {
 
 
     public Monster(MonsterTemplate template) {
-        super(template.getName(), template.getType(), template.getDescription()/*, template.getEffects()*/);
+        super(template.getName(), template.getType(), template.getDescription());
         this.setMonsterType(template.getMonsterType());
         this.setAttribute(template.getAttribute());
         this.setLevel(template.getLevel());
@@ -58,14 +59,6 @@ public class Monster extends Card {
         this.attack = attack;
     }
 
-    public final void increaseAttack(int amount) {
-        this.attack += amount;
-    }
-
-    public final void decreaseAttack(int amount) {
-        this.attack -= amount;
-    }
-
 
     public final int getDefence() {
         return this.defense;
@@ -73,24 +66,5 @@ public class Monster extends Card {
 
     public final void setDefence(int defence) {
         this.defense = defence;
-    }
-
-    public final void increaseDefense(int amount) {
-        this.defense += amount;
-    }
-
-    public final void decreaseDefense(int amount) {
-        this.defense -= amount;
-    }
-
-
-    @Override
-    public String detailedToString() {
-        return "Name: " + this.getName() + "\n" +
-                "Level: " + this.getLevel() + "\n" +
-                "Type: " + this.getType().getName() + "\n" +
-                "Attack: " + this.getAttack() + "\n" +
-                "Defense: " + this.getDefence() + "\n" +
-                "Description: " + this.getDescription();
     }
 }

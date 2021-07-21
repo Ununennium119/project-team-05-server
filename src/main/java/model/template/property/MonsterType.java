@@ -36,6 +36,7 @@ public enum MonsterType {
     }
 
 
+    @SuppressWarnings("unused")
     public String getName() {
         return this.name;
     }

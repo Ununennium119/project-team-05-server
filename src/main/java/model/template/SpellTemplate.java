@@ -17,13 +17,4 @@ public class SpellTemplate extends CardTemplate {
     public SpellTrapStatus getStatus() {
         return this.status;
     }
-
-
-    @Override
-    public String detailedToString() {
-        return "Name: " + this.getName() + "\n" +
-                "Spell\n" +
-                "Type: " + this.getType().getName() + "\n" +
-                "Description: " + this.getDescription();
-    }
 }

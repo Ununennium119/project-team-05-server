@@ -2,14 +2,11 @@ package model;
 
 import control.DataManager;
 import model.card.Card;
-import model.card.Monster;
 import model.card.Spell;
 import model.card.Trap;
 import model.template.property.SpellTrapStatus;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.UUID;
 
 public class Deck implements Cloneable {
@@ -47,10 +44,6 @@ public class Deck implements Cloneable {
         this.name = name;
     }
 
-
-    public ArrayList<String> getMainDeckCardIds() {
-        return mainDeckCardIds;
-    }
 
     public final ArrayList<Card> getMainDeck() {
         DataManager dataManager = DataManager.getInstance();
@@ -93,20 +86,6 @@ public class Deck implements Cloneable {
         return this.mainDeckCardIds.size();
     }
 
-    public final void shuffleMainDeck() {
-        Collections.shuffle(this.mainDeckCardIds);
-    }
-
-    public final Card drawCard() {
-        Card card = DataManager.getInstance().getCardById(this.mainDeckCardIds.get(0));
-        this.mainDeckCardIds.remove(0);
-        return card;
-    }
-
-
-    public ArrayList<String> getSideDeckCardIds() {
-        return sideDeckCardIds;
-    }
 
     public final ArrayList<Card> getSideDeck() {
         DataManager dataManager = DataManager.getInstance();
@@ -150,14 +129,6 @@ public class Deck implements Cloneable {
     }
 
 
-    public final void swapCards(int mainCardPosition, int sideCardPosition) {
-        String mainCardId = this.mainDeckCardIds.get(mainCardPosition - 1);
-        String sideCardId = this.sideDeckCardIds.get(sideCardPosition - 1);
-        this.mainDeckCardIds.set(mainCardPosition - 1, sideCardId);
-        this.sideDeckCardIds.set(sideCardPosition - 1, mainCardId);
-    }
-
-
     public final boolean isCardFull(Card card) {
         ArrayList<Card> mainCards = this.getCardsByNameInMainDeck(card.getName());
         ArrayList<Card> sideCards = this.getCardsByNameInSideDeck(card.getName());
@@ -197,42 +168,6 @@ public class Deck implements Cloneable {
             }
         }
         return addableCards;
-    }
-
-
-    public final String detailedToString(boolean isSide) {
-        DataManager dataManager = DataManager.getInstance();
-        ArrayList<String> cards = isSide ? sideDeckCardIds : mainDeckCardIds;
-        ArrayList<Card> monsters = new ArrayList<>();
-        ArrayList<Card> spellsAndTraps = new ArrayList<>();
-
-        for (String id : cards) {
-            Card card = dataManager.getCardById(id);
-            if (card instanceof Monster) {
-                monsters.add(card);
-            } else {
-                spellsAndTraps.add(card);
-            }
-        }
-        monsters.sort(Comparator.comparing(Card::getName));
-        spellsAndTraps.sort(Comparator.comparing(Card::getName));
-
-        StringBuilder deckString = new StringBuilder();
-        deckString.append("Deck: ").append(this.getName()).append("\r\n")
-                .append(isSide ? "Side" : "Main").append(" deck:\r\n");
-
-        deckString.append("Monsters:\r\n");
-        for (Card monster : monsters) {
-            deckString.append(monster).append("\r\n");
-        }
-
-        deckString.append("Spell and Traps:\r\n");
-        for (Card spellOrTrap : spellsAndTraps) {
-            deckString.append(spellOrTrap).append("\r\n");
-        }
-
-        deckString.delete(deckString.length() - 2, deckString.length());
-        return deckString.toString();
     }
 
 

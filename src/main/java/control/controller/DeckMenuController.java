@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import control.DataManager;
 import control.Receiver;
 import control.message.DeckMenuMessage;
-import control.message.LoginMenuMessage;
 import model.Deck;
 import model.User;
 import model.card.Card;

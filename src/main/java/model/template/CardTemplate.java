@@ -6,14 +6,10 @@ import model.template.property.CardType;
 public abstract class CardTemplate {
 
     //    protected final ArrayList<Effect> effects;
-    protected String name;
-    protected CardType type;
-    protected String description;
-    protected Integer price;
-
-    /*{
-        effects = new ArrayList<>();
-    }*/
+    protected final String name;
+    protected final CardType type;
+    protected final String description;
+    protected final Integer price;
 
 
     protected CardTemplate(String name, CardType type, String description, int price) {
@@ -43,17 +39,6 @@ public abstract class CardTemplate {
         return this.price;
     }
 
-
-    /*public ArrayList<Effect> getEffects() {
-        return this.effects;
-    }*/
-
-    /*public void addEffect(Effect effect) {
-        this.effects.add(effect);
-    }*/
-
-
-    abstract public String detailedToString();
 
     @Override
     public String toString() {

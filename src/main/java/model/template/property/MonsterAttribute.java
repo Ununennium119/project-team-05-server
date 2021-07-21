@@ -1,5 +1,6 @@
 package model.template.property;
 
+@SuppressWarnings("ALL")
 public enum MonsterAttribute {
     EARTH("EARTH"),
     WATER("WATER"),

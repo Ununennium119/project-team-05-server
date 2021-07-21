@@ -9,11 +9,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import com.opencsv.CSVWriter;
-import com.opencsv.ICSVWriter;
+import control.controller.ChatRoomController;
 import control.controller.ScoreboardMenuController;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import model.Deck;
 import model.Message;
 import model.ScoreboardItem;
@@ -42,30 +39,27 @@ import java.util.HashMap;
 
 public class DataManager {
 
-    private static final String AI_JSON_PATH = "data" + File.separator + "ai.json";
     private static final String USERS_JSON_PATH = "data" + File.separator + "users.json";
     private static final String CARDS_JSON_PATH = "data" + File.separator + "cards.json";
     private static final String DECKS_JSON_PATH = "data" + File.separator + "decks.json";
     private static final String MESSAGES_JSON_PATH = "data" + File.separator + "messages.json";
-    //    private static final String EFFECTS_JSON_PATH = "data" + File.separator + "effects.json";
     private static final String MONSTER_CSV_PATH = "data" + File.separator + "Monster.csv";
     private static final String SPELL_TRAP_CSV_PATH = "data" + File.separator + "SpellTrap.csv";
-    private static final String IMPORT_EXPORT_DIR = "import_export";
 
     private static DataManager dataManager;
+    private final ArrayList<User> users;
+    private final ArrayList<Deck> decks;
     private final ArrayList<CardTemplate> templates;
+    private final ArrayList<Card> cards;
+    private final ArrayList<Message> messages;
     private final HashMap<String, String> loggedInUsers;
-    private User ai;
-    private ArrayList<User> users;
-    private ArrayList<Card> cards;
-    private ArrayList<Deck> decks;
-    private ArrayList<Message> messages;
 
     {
         users = new ArrayList<>();
-        cards = new ArrayList<>();
-        templates = new ArrayList<>();
         decks = new ArrayList<>();
+        templates = new ArrayList<>();
+        cards = new ArrayList<>();
+        messages = new ArrayList<>();
         loggedInUsers = new HashMap<>();
     }
 
@@ -75,192 +69,155 @@ public class DataManager {
 
 
     public static DataManager getInstance() {
-        if (dataManager == null) {
-            dataManager = new DataManager();
-        }
-
+        if (dataManager == null) dataManager = new DataManager();
         return dataManager;
     }
 
 
-    public User getAi() {
-        return this.ai;
-    }
-
-
-    public ArrayList<User> getUsers() {
-        return this.users;
-    }
-
-    public synchronized void addUser(User user) {
-        this.users.add(user);
+    public void addUser(User user) {
+        synchronized (this.users) {
+            this.users.add(user);
+        }
         ScoreboardMenuController.refreshScoreboard();
     }
 
     public User getUserByUsername(String username) {
-        for (User user : this.users) {
-            if (username.equals(user.getUsername())) {
-                return user;
+        synchronized (this.users) {
+            for (User user : this.users) {
+                if (username.equals(user.getUsername())) {
+                    return user;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     public User getUserByNickname(String nickname) {
-        for (User user : this.users) {
-            if (nickname.equals(user.getNickname())) {
-                return user;
+        synchronized (this.users) {
+            for (User user : this.users) {
+                if (nickname.equals(user.getNickname())) {
+                    return user;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     private void sortUsers() {
-        this.users.sort(Comparator
-                .comparing(User::getScore, Comparator.reverseOrder())
-                .thenComparing(User::getNickname));
-    }
-
-
-    public ArrayList<CardTemplate> getCardTemplates() {
-        return this.templates;
-    }
-
-    public CardTemplate getCardTemplateByName(String name) {
-        for (CardTemplate template : this.templates) {
-            if (name.equals(template.getName())) {
-                return template;
-            }
+        synchronized (this.users) {
+            this.users.sort(Comparator
+                    .comparing(User::getScore, Comparator.reverseOrder())
+                    .thenComparing(User::getNickname));
         }
-        return null;
     }
 
-    public void addTemplate(CardTemplate template) {
-        this.templates.add(template);
-    }
-
-
-    public ArrayList<Deck> getDecks() {
-        return this.decks;
-    }
 
     public void addDeck(Deck deck) {
-        this.decks.add(deck);
+        synchronized (this.decks) {
+            this.decks.add(deck);
+        }
     }
 
     public Deck getDeckById(String id) {
-        for (Deck deck : this.decks) {
-            if (deck.getId().equals(id)) {
-                return deck;
+        synchronized (this.decks) {
+            for (Deck deck : this.decks) {
+                if (deck.getId().equals(id)) {
+                    return deck;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     public void removeDeck(Deck deck) {
-        this.decks.remove(deck);
+        synchronized (this.decks) {
+            this.decks.remove(deck);
+        }
     }
 
 
-    public ArrayList<Card> getCards() {
-        return this.cards;
+    public CardTemplate getCardTemplateByName(String name) {
+        synchronized (this.templates) {
+            for (CardTemplate template : this.templates) {
+                if (name.equals(template.getName())) {
+                    return template;
+                }
+            }
+            return null;
+        }
     }
+
 
     public void addCard(Card card) {
-        this.cards.add(card);
+        synchronized (this.cards) {
+            this.cards.add(card);
+        }
     }
 
     public Card getCardById(String id) {
-        for (Card card : this.cards) {
-            if (card.getId().equals(id)) {
-                return card;
+        synchronized (this.cards) {
+            for (Card card : this.cards) {
+                if (card.getId().equals(id)) {
+                    return card;
+                }
             }
+            return null;
         }
-        return null;
     }
 
 
     public void addMessage(Message message) {
-        this.messages.add(message);
+        synchronized (this.messages) {
+            this.messages.add(message);
+        }
+        ChatRoomController.updateMessages();
+    }
+
+    public void removeMessage(Message message) {
+        synchronized (this.messages) {
+            this.messages.remove(message);
+        }
+        ChatRoomController.updateMessages();
+    }
+
+    public Message getMessageById(String id) {
+        synchronized (this.messages) {
+            for (Message message : this.messages) {
+                if (id.equals(message.getId())) return message;
+            }
+            return null;
+        }
     }
 
 
     public void addLoggedInUser(String token, String username) {
-        loggedInUsers.put(token, username);
+        synchronized (this.loggedInUsers) {
+            this.loggedInUsers.put(token, username);
+        }
         ScoreboardMenuController.refreshScoreboard();
     }
 
     public void removeLoggedInUser(String token) {
-        loggedInUsers.remove(token);
+        synchronized (this.loggedInUsers) {
+            this.loggedInUsers.remove(token);
+        }
         ScoreboardMenuController.refreshScoreboard();
     }
 
     public User getUserByToken(String token) {
-        String username = loggedInUsers.get(token);
-        if (username == null) return null;
-        return getUserByUsername(username);
+        synchronized (this.loggedInUsers) {
+            String username = this.loggedInUsers.get(token);
+            if (username == null) return null;
+            return getUserByUsername(username);
+        }
     }
 
     public boolean isOnline(User user) {
-        return loggedInUsers.containsValue(user.getUsername());
-    }
-
-
-    public ArrayList<ScoreboardItem> getScoreboardItems(User user) {
-        sortUsers();
-        ArrayList<ScoreboardItem> scoreboardItems = new ArrayList<>();
-        for (int i = 0, rank = 1, size = this.users.size(); i < size; i++) {
-            User currentUser = this.users.get(i);
-            String rankString = String.valueOf(rank);
-            String scoreString = String.valueOf(currentUser.getScore());
-            boolean isCurrentUser = user.equals(currentUser);
-            boolean isOnline = this.isOnline(currentUser);
-            scoreboardItems.add(new ScoreboardItem(rankString, currentUser.getNickname(), scoreString, isCurrentUser, isOnline));
-            if (i < size - 1 && currentUser.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
-        }
-        for (int i = scoreboardItems.size(); i < 20; i++) {
-            scoreboardItems.add(new ScoreboardItem("-", "-", "-", false, false));
-        }
-        return scoreboardItems;
-    }
-
-
-    private RuntimeTypeAdapterFactory<Card> getCardAdapter() {
-        return RuntimeTypeAdapterFactory
-                .of(Card.class, "card_type")
-                .registerSubtype(Monster.class, MonsterTemplate.class.getName())
-                .registerSubtype(Spell.class, SpellTemplate.class.getName())
-                .registerSubtype(Trap.class, TrapTemplate.class.getName());
-    }
-
-    private RuntimeTypeAdapterFactory<CardTemplate> getCardTemplateAdapter() {
-        return RuntimeTypeAdapterFactory
-                .of(CardTemplate.class, "card_template_type")
-                .registerSubtype(MonsterTemplate.class, MonsterTemplate.class.getName())
-                .registerSubtype(SpellTemplate.class, SpellTemplate.class.getName())
-                .registerSubtype(TrapTemplate.class, TrapTemplate.class.getName());
-    }
-
-
-    private JsonArray parseToJsonArray(ArrayList<Card> cards) {
-        RuntimeTypeAdapterFactory<Card> cardAdapter = getCardAdapter();
-        Gson cardGson = new GsonBuilder().serializeNulls().registerTypeAdapterFactory(cardAdapter).create();
-        Type type = new TypeToken<ArrayList<Card>>() {
-        }.getType();
-        return cardGson.toJsonTree(cards, type).getAsJsonArray();
-    }
-
-
-    private void loadAi() {
-        try {
-            Gson gson = new Gson();
-            JsonReader aiReader = new JsonReader(new FileReader(AI_JSON_PATH));
-            this.ai = gson.fromJson(aiReader, User.class);
-            aiReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (this.loggedInUsers) {
+            return this.loggedInUsers.containsValue(user.getUsername());
         }
     }
+
 
     private void loadUsers() {
         try {
@@ -268,7 +225,8 @@ public class DataManager {
             JsonReader userReader = new JsonReader(new FileReader(USERS_JSON_PATH));
             Type userType = new TypeToken<ArrayList<User>>() {
             }.getType();
-            this.users = gson.fromJson(userReader, userType);
+            this.users.clear();
+            this.users.addAll(gson.fromJson(userReader, userType));
             userReader.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -339,7 +297,8 @@ public class DataManager {
             JsonReader cardReader = new JsonReader(new FileReader(CARDS_JSON_PATH));
             Type cardType = new TypeToken<ArrayList<Card>>() {
             }.getType();
-            this.cards = cardGson.fromJson(cardReader, cardType);
+            this.cards.clear();
+            this.cards.addAll(cardGson.fromJson(cardReader, cardType));
             cardReader.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -352,7 +311,8 @@ public class DataManager {
             JsonReader deckReader = new JsonReader(new FileReader(DECKS_JSON_PATH));
             Type deckType = new TypeToken<ArrayList<Deck>>() {
             }.getType();
-            this.decks = gson.fromJson(deckReader, deckType);
+            this.decks.clear();
+            this.decks.addAll(gson.fromJson(deckReader, deckType));
             deckReader.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -365,43 +325,22 @@ public class DataManager {
             JsonReader messagesReader = new JsonReader(new FileReader(MESSAGES_JSON_PATH));
             Type messageType = new TypeToken<ArrayList<Message>>() {
             }.getType();
-            this.messages = gson.fromJson(messagesReader, messageType);
+            this.messages.clear();
+            this.messages.addAll(gson.fromJson(messagesReader, messageType));
             messagesReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /*private void loadEffects() {
-        try {
-            JsonParser parser = new JsonParser();
-            JsonReader effectReader = new JsonReader(new FileReader(EFFECTS_JSON_PATH));
-            JsonArray effectsArray = parser.parse(effectReader).getAsJsonArray();
-            for (JsonElement effectElement : effectsArray) {
-                JsonObject effectObject = effectElement.getAsJsonObject();
-                String cardName = effectObject.get("cardName").getAsString();
-                Event event = Event.valueOf(effectObject.get("event").getAsString());
-                ActionEnum action = ActionEnum.valueOf(effectObject.get("action").getAsString());
-
-                Effect effect = new Effect(event, action);
-                this.getCardTemplateByName(cardName).addEffect(effect);
-            }
-            effectReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
     public void loadData() {
         templates.clear();
-        loadAi();
         loadUsers();
         loadMonsterTemplatesFromCSV();
         loadSpellTrapTemplatesFromCSV();
         loadCards();
         loadDecks();
         loadMessages();
-//        loadEffects();
     }
 
 
@@ -464,105 +403,6 @@ public class DataManager {
     }
 
 
-    public void checkTemplate(CardTemplate template, boolean add) throws Exception {
-        String[] line;
-        String path;
-        if (template instanceof MonsterTemplate) {
-            path = MONSTER_CSV_PATH;
-            line = getCSVLineMonster(template);
-        } else {
-            path = SPELL_TRAP_CSV_PATH;
-            line = getCSVLineSpellTrap(template);
-        }
-
-        if (add) {
-            try {
-                CSVWriter writer = new CSVWriter(new FileWriter(path, true), ',', CSVWriter.NO_QUOTE_CHARACTER, ICSVWriter.DEFAULT_ESCAPE_CHARACTER, ICSVWriter.RFC4180_LINE_END);
-                writer.writeNext(line);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String[] getCSVLineMonster(CardTemplate template) throws Exception {
-        /*if (template.getEffects() == null) {
-            throw new Exception("Invalid File");
-        }*/
-        String[] line = new String[9];
-        line[0] = template.getName();
-        if (getCardTemplateByName(line[0]) != null) throw new Exception("Template Exists");
-        line[1] = String.valueOf(((MonsterTemplate) template).getLevel());
-        line[2] = ((MonsterTemplate) template).getAttribute().getName();
-        line[3] = ((MonsterTemplate) template).getMonsterType().getName();
-        line[4] = template.getType().getName();
-        line[5] = String.valueOf(((MonsterTemplate) template).getAttack());
-        line[6] = String.valueOf(((MonsterTemplate) template).getDefence());
-        line[7] = template.getDescription();
-        line[8] = String.valueOf(template.getPrice());
-        return line;
-    }
-
-    private String[] getCSVLineSpellTrap(CardTemplate template) throws Exception {
-        /*if (template.getEffects() == null) {
-            throw new NullPointerException();
-        }*/
-        String[] line = new String[6];
-        line[0] = template.getName();
-        if (getCardTemplateByName(line[0]) != null) throw new Exception("Template Exists");
-        line[2] = template.getType().getName();
-        line[3] = template.getDescription();
-        line[5] = String.valueOf(template.getPrice());
-
-        if (template instanceof SpellTemplate) {
-            line[1] = "Spell";
-            line[4] = ((SpellTemplate) template).getStatus().getName();
-        } else if (template instanceof TrapTemplate) {
-            line[1] = "Trap";
-            line[4] = ((TrapTemplate) template).getStatus().getName();
-        }
-        return line;
-    }
-
-
-    public boolean importCard(File file, Type type, boolean addToCSV) {
-        try {
-            Gson gson = new GsonBuilder().serializeNulls().create();
-            JsonReader reader = new JsonReader(new FileReader(file));
-            CardTemplate template = gson.fromJson(reader, type);
-            reader.close();
-            this.checkTemplate(template, addToCSV);
-            this.templates.add(template);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    public void exportCard(CardTemplate cardTemplate) {
-        try {
-            Type type;
-            if (cardTemplate instanceof MonsterTemplate) {
-                type = MonsterTemplate.class;
-            } else if (cardTemplate instanceof SpellTemplate) {
-                type = SpellTemplate.class;
-            } else {
-                type = TrapTemplate.class;
-            }
-
-            String path = IMPORT_EXPORT_DIR + "\\" + cardTemplate.getName().replaceAll("\\s", "_") + ".json";
-            Gson gson = new Gson();
-            FileWriter writer = new FileWriter(path);
-            gson.toJson(cardTemplate, type, writer);
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public JsonObject getShopItems(User user) {
         RuntimeTypeAdapterFactory<CardTemplate> cardTemplateAdapter = dataManager.getCardTemplateAdapter();
         Gson gson = new GsonBuilder().registerTypeAdapterFactory(cardTemplateAdapter).create();
@@ -570,7 +410,7 @@ public class DataManager {
 
         JsonArray templatesArray = new JsonArray();
         JsonArray purchasedArray = new JsonArray();
-        for (CardTemplate template : templates) {
+        for (CardTemplate template : this.templates) {
             templatesArray.add(gson.toJsonTree(template, templateType));
             purchasedArray.add(user.getPurchasedCardsByName(template.getName()).size());
         }
@@ -601,8 +441,55 @@ public class DataManager {
         return parseToJsonArray(addableCards);
     }
 
+    public ArrayList<ScoreboardItem> getScoreboardItems(User user) {
+        sortUsers();
+        ArrayList<ScoreboardItem> scoreboardItems = new ArrayList<>();
+        synchronized (this.users) {
+            for (int i = 0, rank = 1, size = this.users.size(); i < size; i++) {
+            User currentUser = this.users.get(i);
+            String rankString = String.valueOf(rank);
+            String scoreString = String.valueOf(currentUser.getScore());
+            boolean isCurrentUser = user.equals(currentUser);
+            boolean isOnline = this.isOnline(currentUser);
+            scoreboardItems.add(new ScoreboardItem(rankString, currentUser.getNickname(), scoreString, isCurrentUser, isOnline));
+            if (i < size - 1 && currentUser.getScore() != this.users.get(i + 1).getScore()) rank = i + 2;
+        }
+        }
+        for (int i = scoreboardItems.size(); i < 20; i++) {
+            scoreboardItems.add(new ScoreboardItem("-", "-", "-", false, false));
+        }
+        return scoreboardItems;
+    }
+
     public JsonArray getMessagesArray() {
         Gson gson = new Gson();
-        return gson.toJsonTree(messages).getAsJsonArray();
+        synchronized (this.messages) {
+            return gson.toJsonTree(messages).getAsJsonArray();
+        }
+    }
+
+
+    private RuntimeTypeAdapterFactory<Card> getCardAdapter() {
+        return RuntimeTypeAdapterFactory
+                .of(Card.class, "card_type")
+                .registerSubtype(Monster.class, MonsterTemplate.class.getName())
+                .registerSubtype(Spell.class, SpellTemplate.class.getName())
+                .registerSubtype(Trap.class, TrapTemplate.class.getName());
+    }
+
+    private RuntimeTypeAdapterFactory<CardTemplate> getCardTemplateAdapter() {
+        return RuntimeTypeAdapterFactory
+                .of(CardTemplate.class, "card_template_type")
+                .registerSubtype(MonsterTemplate.class, MonsterTemplate.class.getName())
+                .registerSubtype(SpellTemplate.class, SpellTemplate.class.getName())
+                .registerSubtype(TrapTemplate.class, TrapTemplate.class.getName());
+    }
+
+    private JsonArray parseToJsonArray(ArrayList<Card> cards) {
+        RuntimeTypeAdapterFactory<Card> cardAdapter = getCardAdapter();
+        Gson cardGson = new GsonBuilder().serializeNulls().registerTypeAdapterFactory(cardAdapter).create();
+        Type type = new TypeToken<ArrayList<Card>>() {
+        }.getType();
+        return cardGson.toJsonTree(cards, type).getAsJsonArray();
     }
 }

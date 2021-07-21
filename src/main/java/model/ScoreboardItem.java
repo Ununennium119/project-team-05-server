@@ -1,5 +1,6 @@
 package model;
 
+@SuppressWarnings("unused")
 public class ScoreboardItem {
 
     private String rank;

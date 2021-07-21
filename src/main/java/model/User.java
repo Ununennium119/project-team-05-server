@@ -13,6 +13,7 @@ public class User {
     private String username;
     private String password;
     private String nickname;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private String activeDeckId;
     private int score;
     private long money;
@@ -67,10 +68,6 @@ public class User {
 
     public void setScore(int score) {
         this.score = score;
-    }
-
-    public void increaseScore(int amount) {
-        this.score += amount;
     }
 
 
@@ -145,10 +142,6 @@ public class User {
         return null;
     }
 
-
-    public Deck getActiveDeck() {
-        return DataManager.getInstance().getDeckById(this.activeDeckId);
-    }
 
     public void setActiveDeck(Deck activeDeck) {
         this.activeDeckId = activeDeck.getId();

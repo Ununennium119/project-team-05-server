@@ -46,15 +46,4 @@ public class MonsterTemplate extends CardTemplate {
     public final int getDefence() {
         return this.defence;
     }
-
-
-    @Override
-    public String detailedToString() {
-        return "Name: " + this.getName() + "\n" +
-                "Level: " + this.getLevel() + "\n" +
-                "Type: " + this.getType().getName() + "\n" +
-                "Attack: " + this.getAttack() + "\n" +
-                "Defense: " + this.getDefence() + "\n" +
-                "Description: " + this.getDescription();
-    }
 }

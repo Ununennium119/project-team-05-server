@@ -1,5 +1,6 @@
 package model.template.property;
 
+@SuppressWarnings("unused")
 public enum SpellTrapStatus {
     UNLIMITED("Unlimited", 3),
     LIMITED("Limited", 1);

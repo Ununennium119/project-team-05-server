@@ -6,6 +6,7 @@ import model.template.property.CardType;
 
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 public abstract class Card {
 
     //    protected final ArrayList<Effect> effects;
@@ -57,39 +58,6 @@ public abstract class Card {
 
     protected void setDescription(String description) {
         this.description = description;
-    }
-
-
-    /*@SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean canRunActions(Event event, DuelMenuController controller) {
-        for (Effect effect : effects) {
-            if (event.equals(effect.getEvent())) {
-                if (!effect.getActionEnum().getAction().canBeRun(controller)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }*/
-
-    /*public void runActions(Event event, DuelMenuController controller) {
-        for (Effect effect : effects) {
-            if (event.equals(effect.getEvent())) {
-                effect.getActionEnum().getAction().run(controller);
-            }
-        }
-    }*/
-
-
-    /*public ArrayList<Effect> getEffects() {
-        return this.effects;
-    }*/
-
-
-    public String detailedToString() {
-        DataManager dataManager = DataManager.getInstance();
-        CardTemplate template = dataManager.getCardTemplateByName(this.getName());
-        return template.detailedToString();
     }
 
 
